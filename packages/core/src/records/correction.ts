@@ -206,7 +206,7 @@ export function applyCorrection(record: FeedRecord, c: Correction, opts: Correct
         value: parsed.value,
         currency: parsed.currency,
         as_written: c.amount.value,
-        ...convertToUsd(parsed.value, parsed.currency, opts.rates),
+        ...convertToUsd(parsed.value, parsed.currency, opts.rates, c.amount.value),
       };
       corrected = true;
     }

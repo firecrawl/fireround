@@ -745,9 +745,29 @@ export function windowLabel(window: Window, now: Date = new Date()): string {
   return monthRange(window.back, now).start.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 }
 
-const CURRENCY_SYMBOLS: Record<string, string> = { $: "USD", "€": "EUR", "£": "GBP", "¥": "JPY", "₹": "INR", "₩": "KRW" };
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  $: "USD",
+  "€": "EUR",
+  "£": "GBP",
+  "¥": "JPY",
+  "₹": "INR",
+  "₩": "KRW",
+  "₦": "NGN",
+  "₱": "PHP",
+  "₺": "TRY",
+  "₪": "ILS",
+  "₫": "VND",
+  "฿": "THB",
+  "₴": "UAH",
+  "₽": "RUB",
+  "₵": "GHS",
+  "৳": "BDT",
+  "₸": "KZT",
+};
+const CURRENCY_SYMBOL = new RegExp(`[${Object.keys(CURRENCY_SYMBOLS).join("").replace("$", "\\$")}]`);
 // A code may be glued to the figure ("USD1.6m"), so the boundary after it is loose.
-const CURRENCY_CODES = /\b(USD|EUR|GBP|JPY|INR|KRW|CAD|AUD|NZD|CHF|SEK|NOK|DKK|SGD|HKD|CNY|RMB|BRL|ILS|AED|SAR|TWD|MXN|ZAR)(?![a-z])/i;
+const CURRENCY_CODES =
+  /\b(USD|EUR|GBP|JPY|INR|KRW|CAD|AUD|NZD|CHF|SEK|NOK|DKK|SGD|HKD|CNY|RMB|BRL|ILS|AED|SAR|TWD|MXN|ZAR|PLN|CZK|HUF|RON|TRY|IDR|MYR|PHP|THB|VND|PKR|BDT|NGN|KES|EGP|GHS|ARS|CLP|COP|PEN|UAH|KZT|QAR|KWD|MAD)(?![a-z])/i;
 const CURRENCY_WORDS: Record<string, string> = {
   crore: "INR",
   cr: "INR",
@@ -802,7 +822,7 @@ export interface ParsedAmount {
 export function isBareDollar(asWritten: string | null | undefined): boolean {
   if (!asWritten) return false;
   const s = asWritten.replace(/,/g, "");
-  const sym = /[$€£¥₹₩]/.exec(s);
+  const sym = CURRENCY_SYMBOL.exec(s);
   if (sym?.[0] !== "$") return false;
   if (DOLLAR_PREFIX.test(s) || /\bus\$/i.test(s)) return false;
   if (CURRENCY_CODES.test(s)) return false;
@@ -1007,7 +1027,7 @@ export function parseAmount(asWritten: string | null | undefined): ParsedAmount 
   const candidates: Array<{ index: number; currency: string }> = [];
   const prefixed = DOLLAR_PREFIX.exec(s);
   if (prefixed) candidates.push({ index: prefixed.index, currency: DOLLAR_PREFIXES[prefixed[1]] ?? "USD" });
-  const sym = /[$€£¥₹₩]/.exec(s);
+  const sym = CURRENCY_SYMBOL.exec(s);
   if (sym) candidates.push({ index: sym.index, currency: CURRENCY_SYMBOLS[sym[0]] ?? "USD" });
   const code = CURRENCY_CODES.exec(s);
   if (code) candidates.push({ index: code.index, currency: code[1].toUpperCase() === "RMB" ? "CNY" : code[1].toUpperCase() });

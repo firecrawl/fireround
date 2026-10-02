@@ -168,7 +168,7 @@ export async function applyFill(handle: Db, row: RoundRow, fill: RecordFill, opt
     );
   const corrects = fromOwnRelease && parsed !== null && (parsed.currency !== amount.currency || parsed.value !== amount.value);
   if (!opts.protectFacts && written && parsed?.value != null && (!amount.as_written || corrects)) {
-    fx = convertToUsd(parsed.value, parsed.currency, opts.rates);
+    fx = convertToUsd(parsed.value, parsed.currency, opts.rates, written);
     amount = { value: parsed.value, currency: parsed.currency, as_written: written, usd_millions: fx.usd_millions };
     filled.push("amount");
   }

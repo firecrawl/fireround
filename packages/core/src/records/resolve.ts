@@ -1385,7 +1385,7 @@ function priceRound(
   ) {
     return "background";
   }
-  const usd = convertToUsd(parsed.value, parsed.currency, ctx.opts.rates ?? null);
+  const usd = convertToUsd(parsed.value, parsed.currency, ctx.opts.rates ?? null, amountText);
   // A valuation is this round's only with its own sentence, checked against the round (valuation.ts).
   // An amount the extractor filed as a valuation is not one: only valuation_as_written is.
   const supported =

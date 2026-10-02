@@ -2,6 +2,7 @@
 
 import type { AlexandriaEnrichment, ApolloEnrichment, FeedRecord, RoundCertainty, Stage, StoredRound } from "@fireround/core";
 import {
+  assertedRoundCertainty,
   canonicalUrl,
   DATE_PRECISION_RANK,
   DEFAULT_TIERS,
@@ -923,12 +924,25 @@ export async function persistRecords(
     await rememberNameKey(handle, companyId, r.company_key, r.company_name, r.sources[0]?.url ?? null);
 
     const prev = existingById.get(r.id);
+    // A closing lifts a reported or expected round only when a page that would make a round visible
+    // states it: a newsletter's "raised" does not outrank a scoop's "nearing" (Modal Labs, 2026-09-28).
+    const certaintyRank: Record<RoundCertainty, number> = { unconfirmed: 0, expected: 1, reported: 2, announced: 3 };
+    const sourceCertainty = r.sources.map((s) => ({
+      source: s,
+      certainty: assertedRoundCertainty(s.evidence ?? (r.sources.length === 1 ? r.evidence_quotes.join(" ") : null)),
+    }));
+    const closes = visibilityEvidence(
+      sourceCertainty.filter((s) => s.certainty === "announced").map((s) => s.source),
+      r.company_domain,
+      [],
+      tiers,
+    );
+    if (prev && prev.certainty !== "announced" && (r.certainty ?? "announced") === "announced" && !closes) r.certainty = prev.certainty;
     if (prev) r.evidence_quotes = [...new Set([...prev.evidence, ...r.evidence_quotes])];
     const upgrade = Boolean(
       prev && prev.certainty !== "announced" && r.certainty === "announced" && matchingCertainty(prev, r, recordIdentity(r)),
     );
     const reportedOn = prev?.reportedOn ?? (r.certainty !== "announced" ? (r.announced_date ?? now.toISOString().slice(0, 10)) : null);
-    const certaintyRank: Record<RoundCertainty, number> = { unconfirmed: 0, expected: 1, reported: 2, announced: 3 };
     const arriving = r.certainty ?? prev?.certainty ?? "announced";
     r.certainty =
       prev?.certainty === "unconfirmed" && arriving !== "announced"

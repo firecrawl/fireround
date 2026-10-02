@@ -976,7 +976,7 @@ async function priceAtDay(reader: HistoryReader, record: FeedRecord): Promise<Fe
   const { value, currency } = record.amount;
   if (value === null || !currency || currency === "USD" || !record.announced_date) return record;
   const rates = await reader.rates(record.announced_date);
-  const usd = convertToUsd(value, currency, rates);
+  const usd = convertToUsd(value, currency, rates, record.amount.as_written);
   return usd.usd_millions === null ? record : { ...record, amount: { ...record.amount, ...usd } };
 }
 

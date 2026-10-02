@@ -80,7 +80,7 @@ export function nonStartupIssuerReason(issuer: IssuerType): string | null {
 }
 
 const FIGURE =
-  /(?:US|AU|NZ|CA|SG|HK|A|C|S)?\$\s*\d[\d,.]*(?:\s*(?:million|billion|m|bn))?|(?:€|£|₹)\s*\d[\d,.]*(?:\s*(?:million|billion|crore|m|bn))?|\b(?:USD|EUR|GBP|INR|AUD|CAD|NZD|SGD|HKD|CNY|RMB|Rs)\s*\d[\d,.]*(?:\s*(?:million|billion|crore|m|bn))?/gi;
+  /(?:US|AU|NZ|CA|SG|HK|A|C|S)?\$\s*\d[\d,.]*(?:\s*(?:million|billion|m|bn))?|(?:€|£|₹|¥|₩|₦|₱|₺|₪|₫|฿|₴|₽|₵|৳|₸)\s*\d[\d,.]*(?:\s*(?:million|billion|crore|m|bn))?|\b(?:USD|EUR|GBP|INR|AUD|CAD|NZD|SGD|HKD|CNY|RMB|Rs|JPY|KRW|CHF|SEK|NOK|DKK|BRL|ILS|AED|SAR|TWD|MXN|ZAR|PLN|CZK|HUF|RON|TRY|IDR|MYR|PHP|THB|VND|PKR|BDT|NGN|KES|EGP|GHS|ARS|CLP|COP|PEN|UAH|KZT|QAR|KWD|MAD)\s*\d[\d,.]*(?:\s*(?:million|billion|crore|m|bn))?/gi;
 
 /** Reads the clause containing this particular figure, not an unrelated number elsewhere on the page. */
 export function moneyKindFromSentence(sentence: string, figure: string | null): MoneyKind {
@@ -93,7 +93,12 @@ export function moneyKindFromSentence(sentence: string, figure: string | null): 
   if (figure && !match) return "unknown";
   const index = match ? money.indexOf(match) : -1;
   const start = index > 0 ? (money[index - 1].index ?? 0) + money[index - 1][0].length : 0;
-  const end = index >= 0 && index + 1 < money.length ? (money[index + 1].index ?? sentence.length) : sentence.length;
+  // A converted figure in parentheses right after this one ("PLN 500 million (CAD 185 million)") is the same money, not the next clause.
+  const after = (i: number) => (money[i].index ?? 0) + money[i][0].length;
+  const converted = (i: number) =>
+    i + 1 < money.length && /^\s*\(\s*(?:about|approximately|around|roughly|~)?\s*$/i.test(sentence.slice(after(i), money[i + 1].index));
+  const next = index >= 0 && converted(index) ? index + 2 : index + 1;
+  const end = index >= 0 && next < money.length ? (money[next].index ?? sentence.length) : sentence.length;
   const context = sentence
     .slice(start, end)
     .replace(/^.*?\b(?:including|comprising)\s+(?:a|an)\s+(?=[$€£₹]|\d)/i, "")
@@ -128,7 +133,7 @@ export function moneyKindFromSentence(sentence: string, figure: string | null): 
     return "future_commitment";
   if (/\b(?:grant|award|subsidy)\b/i.test(context) && !/\b(?:equity|round|financing)\b/i.test(context)) return "grant";
   if (
-    /\b(?:debt financing|venture debt|debt facility|debt proceeds|growth capital facility|multi[ -]year facility|(?:term |venture )?loan (?:financing|facility|proceeds)|credit facility|credit line|borrowed)\b|\b(?:in|of|through|via)\s+debt\b|\bdebt\s+(?:of|worth|totaling)\b/i.test(
+    /\b(?:debt financing|venture debt|debt facility|debt proceeds|growth capital facility|multi[ -]year facility|(?:term |venture )?loan (?:financing|facility|proceeds)|credit facility|credit line|borrowed|project financing|project finance|warehouse (?:financing|facility|line)|tax (?:credit|equity) (?:financing|commitments?|investment)|asset[- ]backed (?:financing|facility))\b|\b(?:in|of|through|via)\s+debt\b|\bdebt\s+(?:of|worth|totaling)\b/i.test(
       context,
     ) &&
     !/\b(?:equity|round|convertible|SAFE)\b/i.test(context)

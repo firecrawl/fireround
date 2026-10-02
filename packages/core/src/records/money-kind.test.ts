@@ -17,6 +17,18 @@ describe("audited money sentences", () => {
     ],
     ["Parallax A", "Parallax has raised $117 million in funding to date, including a $75 million Series A.", "$75 million", "primary"],
     [
+      "Northland project financing",
+      "Northland announced the close of approximately PLN 500 million (CAD 185 million) in project financing for its battery energy storage projects in Poland.",
+      "PLN 500 million",
+      "debt",
+    ],
+    [
+      "SolSource warehouse financing",
+      "SolSource Solutions today announced the closing of $300 million of new tax credit and warehouse financing commitments.",
+      "$300 million",
+      "debt",
+    ],
+    [
       "Nscale commitment",
       "Nscale closed $2.36 billion initially and NVIDIA committed a further $1 billion expected in November.",
       "$1 billion",

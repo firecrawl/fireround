@@ -328,6 +328,21 @@ const INSTITUTION_WORD =
  * institution word after it, names someone else. Taglines (anything with a separator, or longer
  * than six words) and brands that do not contain the name say nothing either way.
  */
+/**
+ * A homepage on a trailing fragment of the company's name whose own brand is that fragment: scale.com,
+ * branded "Scale AI", is not CScale, whatever an identity read says (2026-09-30). The near-same
+ * name is what lets the read call it the same company, so the brand decides.
+ */
+export function brandDisownsHost(host: string, brand: string | null | undefined, name: string): boolean {
+  if (!brand?.trim() || hostFit(host, name) !== null) return false;
+  const { label } = domainLabel(host);
+  const compact = normalizeCompanyKey(name).replace(/\s+/g, "");
+  if (label.length < 3 || !compact.includes(label) || compact.startsWith(label)) return false;
+  // The site calls itself by the fragment ("Scale AI" on scale.com): its own company, not this one.
+  const first = normalizeCompanyKey(brand).split(" ")[0] ?? "";
+  return first === label && !namesCompany(brand, name, { share: 1 }) && !namesCompany(name, brand, { share: 1 });
+}
+
 export function brandNamesOtherEntity(brand: string | null | undefined, name: string): boolean {
   if (!brand || /[|,:;\u00b7\u2013\u2014-]/.test(brand)) return false;
   if (/^home\s*[\\/]\s*/i.test(brand)) return false;
@@ -871,7 +886,7 @@ export async function enrichCompanies(client: Firecrawl, companies: EnrichInput[
           return null;
         }
         const brandName = home.branding?.brandName?.trim();
-        if (brandNamesOtherEntity(brandName, c.company_name)) {
+        if (brandNamesOtherEntity(brandName, c.company_name) || brandDisownsHost(host, brandName, c.company_name)) {
           tried.push({ url, host, origin, reason: `the site's own name is ${brandName}, not ${c.company_name}`, parked: false });
           return null;
         }

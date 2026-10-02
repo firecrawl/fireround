@@ -6,6 +6,7 @@
 
 import {
   aboutLink,
+  brandDisownsHost,
   brandNamesOtherEntity,
   type CompanyProfile,
   enrichCompanies,
@@ -565,6 +566,17 @@ describe("the refusals that must hold", () => {
     expect(enrichments[0]?.company_website).toBeNull();
     expect(enrichments[0]?.profile).toBeNull();
     expect(enrichments[0]?.refused_hosts).toContain("cathedral.org");
+  });
+
+  test("a site named for a trailing fragment of the name is that fragment's company, not this one", () => {
+    expect(brandDisownsHost("scale.com", "Scale AI", "CScale")).toBe(true);
+    // Read off every verified homepage on 2026-10-02: none of these is refused.
+    expect(brandDisownsHost("clastix.io", "Clastix", "Italy’s Clastix")).toBe(false);
+    expect(brandDisownsHost("mycomplianceoffice.com", "MyComplianceOffice", "MCO (MyComplianceOffice)")).toBe(false);
+    expect(brandDisownsHost("breedr.com", "Breedr.com", "Breedr Impact")).toBe(false);
+    expect(brandDisownsHost("helixdi.com", "Home", "Helix Digital Infrastructure")).toBe(false);
+    expect(brandDisownsHost("cscale.ai", "CScale", "CScale")).toBe(false);
+    expect(brandDisownsHost("scale.com", null, "CScale")).toBe(false);
   });
 
   test("a brand that is someone else holding the name is refused; the brands real companies wear pass", () => {
