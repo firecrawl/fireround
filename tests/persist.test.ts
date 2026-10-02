@@ -12,6 +12,7 @@ import {
   isSameRound,
   listRounds,
   listSectors,
+  mergeCompanies,
   mergeDuplicateRounds,
   persistRecords,
   reportRound,
@@ -1712,5 +1713,21 @@ describe("a stale namesake hold", () => {
     );
     const [row] = await db.select().from(schema.fundingRounds).where(eq(schema.fundingRounds.id, r.id));
     expect(row.disposition).toBe("review");
+  });
+});
+
+describe("folding one company into another", () => {
+  test("carries its newsrooms and visitor requests, so the fold is not refused", async () => {
+    const db = await testDb();
+    await db.insert(schema.companies).values([
+      { id: "acme-old", name: "Acme", nameKey: "acme" },
+      { id: "acme.com", name: "Acme", nameKey: "acme", domain: "acme.com" },
+    ]);
+    await db.insert(schema.companyNewsrooms).values({ companyId: "acme-old", url: "https://acme.com/blog", discoveredAt: new Date() });
+    await db.insert(schema.companyNewsroomScans).values({ companyId: "acme-old", discoveredAt: new Date() });
+    await mergeCompanies(db, "acme-old", "acme.com");
+    expect(await db.select().from(schema.companies)).toHaveLength(1);
+    expect((await db.select().from(schema.companyNewsrooms)).map((n) => n.companyId)).toEqual(["acme.com"]);
+    expect((await db.select().from(schema.companyNewsroomScans)).map((n) => n.companyId)).toEqual(["acme.com"]);
   });
 });

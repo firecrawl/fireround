@@ -155,6 +155,16 @@ async function foldCompany(handle: Db, fromId: string, intoId: string): Promise<
     sql`insert into history_promotions (company_id, prior_key, prior, status, attempts, next_attempt_at, claimed_by, round_id, source_url, outcome, credits, last_error, created_at, updated_at) select ${intoId}, prior_key, prior, status, attempts, next_attempt_at, claimed_by, round_id, source_url, outcome, credits, last_error, created_at, updated_at from history_promotions where company_id = ${fromId} on conflict do nothing`,
   );
   await handle.delete(schema.historyPromotions).where(eq(schema.historyPromotions.companyId, fromId));
+  // Its newsrooms, their scan marker and any visitor request follow it too, or the delete below is refused.
+  await handle.execute(
+    sql`insert into company_newsrooms (company_id, url, monitor_id, discovered_at, checked_at) select ${intoId}, url, monitor_id, discovered_at, checked_at from company_newsrooms where company_id = ${fromId} on conflict do nothing`,
+  );
+  await handle.delete(schema.companyNewsrooms).where(eq(schema.companyNewsrooms.companyId, fromId));
+  await handle.execute(
+    sql`insert into company_newsroom_scans (company_id, discovered_at) select ${intoId}, discovered_at from company_newsroom_scans where company_id = ${fromId} on conflict do nothing`,
+  );
+  await handle.delete(schema.companyNewsroomScans).where(eq(schema.companyNewsroomScans.companyId, fromId));
+  await handle.update(schema.companyRequests).set({ companyId: intoId }).where(eq(schema.companyRequests.companyId, fromId));
   // The domain is unique, so the row that goes is deleted before the survivor takes its domain.
   await handle.delete(companies).where(eq(companies.id, fromId));
   await handle
