@@ -45,7 +45,9 @@
     "repair-audit": "node --env-file-if-exists=.env scripts/maintenance/repair-audit.ts",
     "eval-jev": "node --env-file-if-exists=.env scripts/eval-jev.ts",
     "jev-shadow": "node --env-file-if-exists=.env scripts/jev-shadow.ts",
-    "bench-publication-audit": "node --env-file-if-exists=.env scripts/bench-publication-audit.ts"
+    "bench-publication-audit": "node --env-file-if-exists=.env scripts/bench-publication-audit.ts",
+    "shadow-editor": "node --env-file-if-exists=.env scripts/shadow-editor.ts",
+    "score-editor": "node scripts/score-editor.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

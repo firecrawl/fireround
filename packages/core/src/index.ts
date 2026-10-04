@@ -17,6 +17,7 @@ export * from "./firecrawl/reader.ts";
 export * from "./firecrawl/sweep.ts";
 export * from "./firecrawl/watch.ts";
 export * from "./llm/dossier-verify.ts";
+export * from "./llm/editor.ts";
 export * from "./llm/jev.ts";
 export * from "./llm/model.ts";
 export * from "./llm/publication-audit.ts";
