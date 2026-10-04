@@ -937,10 +937,25 @@ export async function persistRecords(
     // A closing lifts a reported or expected round only when a page that would make a round visible
     // states it: a newsletter's "raised" does not outrank a scoop's "nearing" (Modal Labs, 2026-09-28).
     const certaintyRank: Record<RoundCertainty, number> = { unconfirmed: 0, expected: 1, reported: 2, announced: 3 };
-    const sourceCertainty = r.sources.map((s) => ({
-      source: s,
-      certainty: assertedRoundCertainty(s.evidence ?? (r.sources.length === 1 ? r.evidence_quotes.join(" ") : null)),
-    }));
+    const sourceCertainty = [
+      ...r.sources.map((s) => ({
+        source: s,
+        certainty: assertedRoundCertainty(s.evidence ?? (r.sources.length === 1 ? r.evidence_quotes.join(" ") : null)),
+      })),
+      ...(prev?.sourceIds ?? [])
+        .filter((url) => !r.sources.some((s) => canonicalUrl(s.url) === url))
+        .map((url) => {
+          const evidence = excerpts.get(`${r.id}:${url}`) ?? null;
+          return { source: { url, title: titles.get(url) ?? undefined, evidence }, certainty: assertedRoundCertainty(evidence) };
+        }),
+    ];
+    // A page that would make a round visible on its own and says it is still being raised or only reported.
+    const doubtedBy = sourceCertainty
+      .filter(
+        (s) => (s.certainty === "expected" || s.certainty === "reported") && visibilityEvidence([s.source], r.company_domain, [], tiers),
+      )
+      .map((s) => s.certainty as "expected" | "reported")
+      .sort((a, b) => certaintyRank[b] - certaintyRank[a])[0];
     const closes = visibilityEvidence(
       sourceCertainty.filter((s) => s.certainty === "announced").map((s) => s.source),
       r.company_domain,
@@ -960,6 +975,8 @@ export async function persistRecords(
         : prev && certaintyRank[prev.certainty] > certaintyRank[arriving]
           ? prev.certainty
           : arriving;
+    // Nor does a low-tier "closed" stand against an established outlet's "reportedly raising" (FieldAI, 2026-10-02).
+    if (r.certainty === "announced" && !closes && doubtedBy) r.certainty = doubtedBy;
     if (upgrade && reportedOn) {
       const note = `Reported before its announcement on ${reportedOn}`;
       const verification = r.verification ?? { status: "unverified" as const, notes: [], url: null };

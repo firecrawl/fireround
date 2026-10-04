@@ -187,6 +187,13 @@ export async function finishDiveStep(companyId: string, jobId: string, result: D
   const client = getFirecrawl();
   if (result.status === "processing") await client.cancelAgent(jobId).catch(() => false);
   const handle = await db();
+  // Folded into another company while the dive ran: the survivor's own dossier stands, so this one is dropped.
+  const [exists] = await handle
+    .select({ id: schema.companies.id })
+    .from(schema.companies)
+    .where(eq(schema.companies.id, companyId))
+    .limit(1);
+  if (!exists) return { companyId, action: "dive", status: "skipped", agentCredits: result.creditsUsed ?? 0, checkCredits: 0 };
   const outcome = await finishCompanyDive(handle, client, companyId, result, new Date(startedAt));
   await invalidateEntityPages(handle, { companyIds: [companyId] });
   return {

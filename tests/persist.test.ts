@@ -94,6 +94,7 @@ describe("persistRecords", () => {
       certainty: "announced",
       amount: { ...report.amount, value: 50, usd_millions: 50, as_written: "$50M" },
       valuation_as_written: "$1 billion",
+      evidence_quotes: ["Modal Labs raised $50M at a $1 billion valuation."],
     });
     await persistRecords(db, [different], "series-c-plus", "different");
     expect((await db.select().from(schema.fundingRounds)).length).toBe(2);
@@ -141,6 +142,37 @@ describe("persistRecords", () => {
       sources: [{ url: "https://scouts.yutori.com/funding", host: "scouts.yutori.com", title: "AI Startup Funding Announcements" }],
     });
     await persistRecords(db, [roundup], "series-c-plus", "roundup");
+    const [row] = await db.select().from(schema.fundingRounds);
+    expect(row.certainty).toBe("expected");
+  });
+
+  test("a low-tier closing does not stand against an established outlet's report that the round is still being raised", async () => {
+    const db = await testDb();
+    const round = record({
+      company_name: "FieldAI",
+      company_domain: "fieldai.com",
+      stage: "series_c",
+      stage_as_written: "Series C",
+      announced_date: "2026-10-02",
+      certainty: "announced",
+      amount: { value: 700, currency: "USD", as_written: "$700M", usd_millions: 700, fx_rate: 1, fx_date: "2026-10-02" },
+      evidence_quotes: ["FieldAI closed a $700 million round at a $10 billion valuation."],
+      sources: [
+        {
+          url: "https://aiweekly.co/fieldai",
+          host: "aiweekly.co",
+          title: "FieldAI Lands $700M",
+          evidence: "FieldAI closed a $700 million round at a $10 billion valuation.",
+        },
+        {
+          url: "https://siliconangle.com/fieldai",
+          host: "siliconangle.com",
+          title: "FieldAI reportedly raising $700M",
+          evidence: "FieldAI Inc. is reportedly seeking $700 million in funding.",
+        },
+      ],
+    });
+    await persistRecords(db, [round], "series-c-plus", "fieldai");
     const [row] = await db.select().from(schema.fundingRounds);
     expect(row.certainty).toBe("expected");
   });
