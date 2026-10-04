@@ -19,6 +19,7 @@ export * from "./firecrawl/watch.ts";
 export * from "./llm/dossier-verify.ts";
 export * from "./llm/jev.ts";
 export * from "./llm/model.ts";
+export * from "./llm/publication-audit.ts";
 export * from "./llm/reconcile.ts";
 export * from "./presets/types.ts";
 export * from "./records/accuracy.ts";

@@ -44,7 +44,8 @@
     "repair-trust-freshness": "node --env-file-if-exists=.env scripts/maintenance/repair-trust-freshness.ts",
     "repair-audit": "node --env-file-if-exists=.env scripts/maintenance/repair-audit.ts",
     "eval-jev": "node --env-file-if-exists=.env scripts/eval-jev.ts",
-    "jev-shadow": "node --env-file-if-exists=.env scripts/jev-shadow.ts"
+    "jev-shadow": "node --env-file-if-exists=.env scripts/jev-shadow.ts",
+    "bench-publication-audit": "node --env-file-if-exists=.env scripts/bench-publication-audit.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

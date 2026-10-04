@@ -159,6 +159,12 @@ export const fundingRounds = pgTable(
      * (lib/late-report.ts). A held row is never delivered, and no reading moves its disposition.
      */
     hold: text("hold"),
+    /** The publication audit's last verdict on this row (lib/publication-audit.ts). */
+    audit: jsonb("audit").$type<{ status: "pass" | "fail" | "human"; model?: string; at?: string; reasons?: string[]; summary?: string }>(),
+    /** The fingerprint of the facts the passing audit judged; the trigger compares it on every write. */
+    auditFacts: text("audit_facts"),
+    /** The disposition a row asked for while the publication gate holds it in review for its audit. */
+    pendingDisposition: dispositionEnum("pending_disposition"),
     /**
      * Facts a person set by hand (`pnpm fix-records`: a redate's day, a restage's stage) with the page
      * that states them. No later reading, read-back, merge, or maintenance pass moves a pinned fact:

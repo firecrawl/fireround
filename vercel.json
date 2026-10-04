@@ -1,14 +1,45 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
-    { "path": "/api/cron/sweep", "schedule": "0 * * * *" },
-    { "path": "/api/cron/deliveries", "schedule": "0 */6 * * *" },
-    { "path": "/api/cron/trending", "schedule": "0 * * * *" },
-    { "path": "/api/cron/announcements", "schedule": "0 * * * *" },
-    { "path": "/api/cron/slack-digest", "schedule": "0 7 * * *" },
-    { "path": "/api/cron/accuracy", "schedule": "0 5 * * *" },
-    { "path": "/api/cron/company-newsrooms", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/verify-rounds", "schedule": "*/15 * * * *" },
-    { "path": "/api/cron/health", "schedule": "*/10 * * * *" }
+    {
+      "path": "/api/cron/sweep",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/deliveries",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/trending",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/announcements",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/slack-digest",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/accuracy",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/company-newsrooms",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/verify-rounds",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/publication-audit",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/health",
+      "schedule": "*/10 * * * *"
+    }
   ]
 }

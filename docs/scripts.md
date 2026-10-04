@@ -28,6 +28,7 @@ Every `pnpm` script in `package.json`, one line each; the ones under `scripts/` 
 | `curl .../api/cron/health` | Not a script: the production health check, on the schedule every 10 minutes and by hand with the cron bearer (`?dry=1` reports what fails without writing or sending, `?test=1` sends one test line to `ALERT_SLACK_WEBHOOK_URL`). What it checks: [deploy.md](deploy.md#production-alerts) |
 | `pnpm accuracy-check` | Print what the daily accuracy check would flag today (counts per rule and the most urgent flags) without writing; `-- --top 50`, `--limit 40`, `--json`. Reads only, so it is safe against production |
 | `pnpm bench-reconcile -- <model> [<model>]` | Score reconcile models against `evals/golden-rounds.json` on identical prompts: per-field accuracy, agreement, latency, tokens, cost |
+| `pnpm bench-publication-audit -- <cases.json> [--overlay rows.json]` | Score the publication audit against hand-checked rounds (`[{ id, clean, problems }]`): wrong rows caught, clean rows held or changed. Reads the store and each round's pages; writes nothing |
 | `pnpm bench-pipeline` | Replay the 42 sourced fixture excerpts through extraction, resolver, price, and evidence check; `-- --assert` gates deterministic CI, `-- --stored` uses captured markdown and Firecrawl JSON, `-- --model <id>` compares a structured reader with the model read-back. See [bench-pipeline.md](bench-pipeline.md) |
 
 ## Maintenance

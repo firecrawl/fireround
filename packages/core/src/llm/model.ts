@@ -108,6 +108,26 @@ export function dossierVerifyModel(env: Record<string, string | undefined> = pro
   return buildModel(pick, env);
 }
 
+/**
+ * The publication audit's model: a different family from the read-back's default, so the last look
+ * does not share the first one's blind spots, at a mid-priced tier. PUBLICATION_AUDIT_MODEL overrides it.
+ */
+export const PUBLICATION_AUDIT_DEFAULT_MODEL: Record<ReconcileProvider, string> = {
+  gateway: "anthropic/claude-sonnet-5-5",
+  openai: "gpt-6-sol",
+  openrouter: "anthropic/claude-sonnet-5.5",
+  anthropic: "claude-sonnet-5-5",
+};
+
+export function publicationAuditModel(env: Record<string, string | undefined> = process.env): ReconcileModel | null {
+  const pick = reconcileProviderFor({ ...env, RECONCILE: undefined });
+  if (!pick || (env.PUBLICATION_AUDIT ?? "").toLowerCase() === "off") return null;
+  return buildModel(
+    { provider: pick.provider, modelId: env.PUBLICATION_AUDIT_MODEL?.trim() || PUBLICATION_AUDIT_DEFAULT_MODEL[pick.provider] },
+    env,
+  );
+}
+
 function buildModel(pick: { provider: ReconcileProvider; modelId: string }, env: Record<string, string | undefined>): ReconcileModel {
   const key = `${pick.provider}:${pick.modelId}:${env[KEY_FOR[pick.provider]] ?? "oidc"}`;
   const hit = cached.get(key);

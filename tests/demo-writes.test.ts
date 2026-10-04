@@ -87,6 +87,7 @@ const ROUTE_GUARDS: Record<string, Record<string, string>> = {
   "app/api/cron/slack-digest/route.ts": { GET: "CRON_SECRET" },
   "app/api/cron/sweep/route.ts": { GET: "CRON_SECRET" },
   "app/api/cron/trending/route.ts": { GET: "CRON_SECRET" },
+  "app/api/cron/publication-audit/route.ts": { GET: "CRON_SECRET" },
   "app/api/cron/verify-rounds/route.ts": { GET: "CRON_SECRET" },
   "app/api/digest/unsubscribe/route.ts": {
     GET: "signed link, confirm page only",

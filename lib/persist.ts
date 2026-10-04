@@ -1221,6 +1221,8 @@ export async function persistRecords(
                   ? // A valuation taken off, a broken invariant, or secondhand sources move even a published row.
                     sql`CASE WHEN ${fundingRounds.hold} IS NULL AND ${fundingRounds.disposition} IN ('review', 'flagged', 'publish') THEN ${disposition}::disposition ELSE ${fundingRounds.disposition} END`
                   : sql`CASE WHEN ${fundingRounds.hold} IS NULL AND ${fundingRounds.disposition} IN ('review', 'flagged') THEN ${disposition}::disposition ELSE ${fundingRounds.disposition} END`,
+          // A reading that holds the row in review withdraws what it asked for at the publication gate.
+          ...(disposition === "review" ? { pendingDisposition: null } : {}),
         })
         .where(eq(fundingRounds.id, r.id));
       if (changed) {
@@ -2344,7 +2346,14 @@ export async function setDisposition(handle: Db, id: string, disposition: "publi
   const lifts = disposition === "publish" || disposition === "flagged";
   await handle
     .update(fundingRounds)
-    .set({ disposition, ...(lifts ? { hold: null } : {}), updatedAt: new Date() })
+    .set({
+      disposition,
+      // A person's placement is the audit: publishing passes the gate, any other choice withdraws the request.
+      ...(lifts
+        ? { hold: null, audit: { status: "human" as const, at: new Date().toISOString() }, auditFacts: null }
+        : { pendingDisposition: null }),
+      updatedAt: new Date(),
+    })
     .where(eq(fundingRounds.id, id));
 }
 
@@ -2359,7 +2368,10 @@ export async function reportRound(handle: Db, id: string, reason: string): Promi
   if (!row) return;
   const current = (row.verification as RoundRow["verification"]) ?? { status: "unverified", notes: [], url: null };
   const verification = { ...current, notes: [...current.notes, `reported: ${reason.trim()}`] };
-  await handle.update(fundingRounds).set({ disposition: "review", verification, updatedAt: new Date() }).where(eq(fundingRounds.id, id));
+  await handle
+    .update(fundingRounds)
+    .set({ disposition: "review", pendingDisposition: null, verification, updatedAt: new Date() })
+    .where(eq(fundingRounds.id, id));
 }
 
 /** Distinct sectors seen on visible records, for the filter menu. */
