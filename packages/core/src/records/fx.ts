@@ -33,6 +33,9 @@ export function statedUsdMillions(asWritten: string | null | undefined): number 
   return value > 0 ? Math.round(value * 1000) / 1000 : null;
 }
 
+/** Currencies pegged to the dollar that the ECB table does not carry: the peg is the rate. */
+const PEGGED_PER_USD: Record<string, number> = { AED: 3.6725, SAR: 3.75, QAR: 3.64, BHD: 0.376, OMR: 0.3845, JOD: 0.709 };
+
 export function convertToUsd(
   valueMillions: number | null,
   currency: string | null,
@@ -41,7 +44,7 @@ export function convertToUsd(
 ): UsdConversion {
   if (valueMillions === null || !currency) return { usd_millions: null, fx_rate: null, fx_date: null };
   if (currency === "USD") return { usd_millions: valueMillions, fx_rate: 1, fx_date: rates?.date ?? null };
-  const rate = rates?.perUsd[currency];
+  const rate = rates?.perUsd[currency] ?? (rates ? PEGGED_PER_USD[currency] : undefined);
   if (!rate || !rates) {
     const stated = statedUsdMillions(asWritten);
     return stated === null

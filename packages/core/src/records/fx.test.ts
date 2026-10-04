@@ -31,6 +31,11 @@ describe("currencies beyond the dollar, euro, pound, yen, rupee and won", () => 
     expect(convertToUsd(500, "PLN", RATES, "PLN 500 million ($130 million)").usd_millions).toBeCloseTo(128.205, 3);
   });
 
+  test("a dollar-pegged currency the rate table lacks converts at its peg", () => {
+    expect(convertToUsd(3.75, "SAR", RATES, "SAR 3.75 million").usd_millions).toBe(1);
+    expect(convertToUsd(15, "AED", RATES, "AED 15 million").usd_millions).toBeCloseTo(4.084, 3);
+  });
+
   test("stated dollar figures read their unit", () => {
     expect(statedUsdMillions("€3m (US$3.5m)")).toBe(3.5);
     expect(statedUsdMillions("₦2.5 billion (about $1.7 million)")).toBe(1.7);
