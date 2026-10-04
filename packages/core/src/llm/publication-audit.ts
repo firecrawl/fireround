@@ -8,6 +8,7 @@
 
 import { generateText, Output } from "ai";
 import { z } from "zod";
+import { namesCompany } from "../records/normalize.ts";
 import type { ReconcileModel } from "./model.ts";
 import type { SourceText } from "./reconcile.ts";
 
@@ -177,6 +178,13 @@ export type AuditFix =
 
 export type AuditDecision = { action: "pass" | "hold"; reasons: string[]; fixes: AuditFix[]; notes: string[] };
 
+const bareHost = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/[/?#].*$/, "");
+
 const quoted = (c: { quote: string | null; source: string | null }) => Boolean(c.quote?.trim() && c.source?.trim());
 
 /**
@@ -189,8 +197,16 @@ export function decideAudit(round: AuditedRound, audit: PublicationAudit): Audit
   const reasons: string[] = [];
   const fixes: AuditFix[] = [];
   const notes: string[] = [];
-  if (audit.company.verdict === "wrong" && quoted(audit.company))
-    reasons.push(`wrong company: ${audit.company.correct ?? "the pages name another organisation"} (${audit.company.source})`);
+  // A "wrong company" whose right answer is on the row's own website is a detail of the profile (a
+  // headquarters, a description), not a namesake: noted for a person, not hidden.
+  const sites = [round.company.domain, round.company.website].flatMap((s) => (s ? [bareHost(s)] : []));
+  const named = [...(audit.company.correct ?? "").matchAll(/https?:\/\/[^\s),;]+/gi)].map((m) => bareHost(m[0]));
+  const sameSite =
+    named.length > 0 && named.every((host) => sites.includes(host)) && namesCompany(audit.company.correct, round.company.name);
+  if (audit.company.verdict === "wrong" && quoted(audit.company)) {
+    if (sameSite) notes.push(`publication audit: company profile: ${audit.company.correct} (${audit.company.source})`);
+    else reasons.push(`wrong company: ${audit.company.correct ?? "the pages name another organisation"} (${audit.company.source})`);
+  }
   if (audit.round_type.kind !== "private_company_round")
     reasons.push(
       `not a private company's round: ${audit.round_type.kind.replace(/_/g, " ")}${audit.round_type.source ? ` (${audit.round_type.source})` : ""}`,
@@ -199,10 +215,10 @@ export function decideAudit(round: AuditedRound, audit: PublicationAudit): Audit
     const scope = audit.amount.scope;
     if (scope === "cumulative" || scope === "includes_secondary" || scope === "includes_debt" || scope === "combined_rounds")
       fixes.push({ kind: "amount_scope", scope, quote: audit.amount.quote ?? "", source: audit.amount.source ?? "" });
-    else
-      reasons.push(
-        `amount: ${round.amount_as_written ?? "none"} should be ${audit.amount.correct ?? "something else"} (${audit.amount.source})`,
-      );
+    // A row that shows no amount misleads no one; the figure a page states is noted for a person.
+    else if (!round.amount_as_written)
+      notes.push(`publication audit: amount stated as ${audit.amount.correct ?? "a figure"} (${audit.amount.source})`);
+    else reasons.push(`amount: ${round.amount_as_written} should be ${audit.amount.correct ?? "something else"} (${audit.amount.source})`);
   }
   const weaker = audit.certainty.correct === "expected" || audit.certainty.correct === "reported";
   if (audit.certainty.verdict === "wrong" && quoted(audit.certainty) && weaker && round.certainty === "announced")

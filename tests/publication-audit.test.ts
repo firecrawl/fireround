@@ -69,6 +69,30 @@ describe("what an audit verdict does", () => {
     expect(d.fixes.map((f) => f.kind).sort()).toEqual(["amount_scope", "certainty", "drop_sources"]);
   });
 
+  test("a 'wrong company' whose right answer is the row's own website is a note, not a hold", () => {
+    const d = decideAudit(shown, {
+      ...clean,
+      company: {
+        verdict: "wrong",
+        correct: "Viking (https://vikings.com/), based in Minneapolis",
+        quote: "Viking, based in Minneapolis",
+        source: IR,
+      },
+    });
+    expect(d.action).toBe("pass");
+    expect(d.notes[0]).toContain("company profile");
+    const named = decideAudit(shown, {
+      ...clean,
+      company: {
+        verdict: "wrong",
+        correct: "Viking Therapeutics; the vikings.com site does not match",
+        quote: "Viking Therapeutics announced",
+        source: IR,
+      },
+    });
+    expect(named.action).toBe("hold");
+  });
+
   test("a wrong verdict without the sentence that proves it changes nothing", () => {
     const d = decideAudit(shown, { ...clean, company: { verdict: "wrong", correct: "Someone else", quote: null, source: null } });
     expect(d).toMatchObject({ action: "pass", reasons: [], fixes: [] });

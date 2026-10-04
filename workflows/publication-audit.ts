@@ -3,6 +3,8 @@
 // hold leaves it in review with its reasons. A row no page of which could be read waits for the next run.
 
 import { DEFAULT_TIERS, firecrawlReader, publicationAuditModel } from "@fireround/core";
+import { schema } from "@fireround/core/db";
+import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { enqueueDeliveries } from "@/lib/delivery";
 import { invalidateEntityPages } from "@/lib/entity-invalidation";
@@ -40,7 +42,11 @@ async function auditStep(id: string): Promise<"passed" | "held" | "unread" | "mo
   if (!model || !row || row.disposition !== "review") return "moved";
   const tiers = { ...DEFAULT_TIERS, ...(await loadPublisherTiers()) };
   const run = await auditRow(row, firecrawlReader(getFirecrawl()), model, tiers);
-  if (!run) return "unread";
+  if (!run) {
+    // Back of the queue, so a row whose pages cannot be read does not starve the rows behind it.
+    await handle.update(schema.fundingRounds).set({ updatedAt: new Date() }).where(eq(schema.fundingRounds.id, id));
+    return "unread";
+  }
   const outcome = await applyAudit(handle, row, run, model.label);
   if (outcome === "passed" && !row.history) await enqueueDeliveries(handle, [id], row.preset_slug);
   await invalidateEntityPages(handle, { roundIds: [id] });
