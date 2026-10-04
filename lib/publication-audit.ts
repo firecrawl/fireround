@@ -96,8 +96,17 @@ export async function auditRow(
   // The model reads the first screens of each page; a roundup names the round further down. A page
   // leaves the row only when it was read and its whole text never names the company.
   const names = (text: string) => {
-    const words = row.company.name.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-    return words.length > 0 && text.toLowerCase().replace(/[^a-z0-9]+/g, " ").includes(words);
+    const words = row.company.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+    return (
+      words.length > 0 &&
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .includes(words)
+    );
   };
   const unrelated = output.unrelated_sources.filter((url) => {
     const page = pages.find((p) => p.url === url);
