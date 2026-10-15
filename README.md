@@ -89,7 +89,6 @@ Only `FIRECRAWL_API_KEY` is required to run sweeps, and production also needs `C
 | `DASHBOARD_PASSWORD` | HTTP Basic auth on the dashboard and `/api/v1`; unset means open |
 | `CRON_SECRET` | Bearer for the cron routes; Vercel Cron and a production `pnpm start` send it on every scheduled call, and without it production runs nothing on a schedule |
 | `MCP_API_KEY` | Bearer for `/api/mcp`; required to enable MCP on a password-protected private deployment |
-| `ALEXANDRIA_API_KEY` | Bearer Firecrawl's Alexandria sends to `/api/v1` on a public demo; its calls skip the per-address budgets and read the same public rows ([docs/deploy.md](docs/deploy.md#alexandria)) |
 | `AI_GATEWAY_API_KEY` | Reads every record against all its sources with a model before it publishes (or set an OpenAI, OpenRouter, or Anthropic key) |
 | `APP_ORIGIN` | Your public URL, for webhooks, Slack links, and share cards |
 
