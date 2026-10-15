@@ -17,25 +17,25 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.60",
-    "@ai-sdk/gateway": "^4.0.89",
-    "@ai-sdk/openai": "^4.0.72",
+    "@ai-sdk/anthropic": "^4.0.78",
+    "@ai-sdk/gateway": "^4.0.110",
+    "@ai-sdk/openai": "^4.0.91",
     "@electric-sql/pglite": "^0.5.8",
-    "@neondatabase/serverless": "^1.1.0",
+    "@neondatabase/serverless": "^1.2.0",
     "@openrouter/ai-sdk-provider": "^3.1.0",
-    "ai": "^7.0.110",
-    "chrono-node": "^2.10.1",
+    "ai": "^7.0.137",
+    "chrono-node": "^2.10.3",
     "drizzle-orm": "1.0.0-rc.4",
-    "firecrawl": "^4.42.4",
-    "pg": "^8.23.0",
-    "tldts": "^7.4.14",
-    "zod": "^4.6.5"
+    "firecrawl": "^4.46.0",
+    "pg": "^8.23.1",
+    "tldts": "^7.4.18",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^24",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "1.0.0-rc.4",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.3"
   }
 }
