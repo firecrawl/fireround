@@ -1,0 +1,11 @@
+# gitleaks false positives: documented example credentials in tests (X's OAuth 1.0a signature
+# example, the Standard Webhooks example secret, placeholder Slack keys and company keys).
+b4c5df2559b5ec3df5fc838b4f7e63fbf17fa5e6:tests/delivery.test.ts:generic-api-key:35
+b4c5df2559b5ec3df5fc838b4f7e63fbf17fa5e6:tests/persist.test.ts:generic-api-key:419
+b4c5df2559b5ec3df5fc838b4f7e63fbf17fa5e6:tests/slack-credentials.test.ts:generic-api-key:43
+b4c5df2559b5ec3df5fc838b4f7e63fbf17fa5e6:tests/slack-credentials.test.ts:generic-api-key:90
+ed4182b8af0830cd576006c065472cb285425e2d:tests/x-posts.test.ts:generic-api-key:119
+ed4182b8af0830cd576006c065472cb285425e2d:tests/x-posts.test.ts:generic-api-key:89
+ed4182b8af0830cd576006c065472cb285425e2d:tests/x-posts.test.ts:generic-api-key:90
+ed4182b8af0830cd576006c065472cb285425e2d:tests/x-posts.test.ts:generic-api-key:91
+ed4182b8af0830cd576006c065472cb285425e2d:tests/x-posts.test.ts:generic-api-key:92
