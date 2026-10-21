@@ -62,7 +62,7 @@
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@fireround/core": "workspace:*",
-    "@modelcontextprotocol/server": "^2.0.0",
+    "@modelcontextprotocol/server": "^2.3.0",
     "@neondatabase/serverless": "^1.1.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/functions": "^3.9.9",
