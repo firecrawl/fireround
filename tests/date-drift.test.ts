@@ -7,7 +7,7 @@ import { type FeedRecord, settleDate, wireReleaseDay } from "@fireround/core";
 import type { Db } from "@fireround/core/db";
 import { schema } from "@fireround/core/db";
 import { eq } from "drizzle-orm";
-import { describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { keepsStoredDay, mergeDuplicateRounds, neverLater, persistRecords } from "../lib/persist";
 import { applyRecordFixes, type RecordFix } from "../lib/repair";
 import { record, testDb } from "./helpers";
@@ -221,6 +221,17 @@ describe("a wire release announcing the round today dates it", () => {
       lead_investors: ["GIC"],
       ...partial,
     });
+
+  // The round is caught on its release day. A round first seen more than NEWS_WINDOW_DAYS after its day
+  // is a later report, which the reported-later trigger keeps as history, so the clock stays on that day.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-02T18:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   test("wireReleaseDay reads the dateline of a release that calls the round today's news", () => {
     expect(wireReleaseDay([DATELINE])).toBe("2026-10-02");

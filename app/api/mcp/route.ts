@@ -5,7 +5,7 @@
 import type { Stage } from "@fireround/core";
 import { ROUND_CERTAINTIES, STAGES } from "@fireround/core";
 import type { Db } from "@fireround/core/db";
-import type { ServerContext } from "@modelcontextprotocol/server";
+import type { McpServerOptions, ServerContext } from "@modelcontextprotocol/server";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { z } from "zod";
 import { isPublicDemo, mcpTrusted } from "@/lib/access";
@@ -541,7 +541,12 @@ const handler = createMcpHandler(
       );
     }
   },
-  { serverInfo: { name: "fireround", version: "0.1.0" } },
+  // mcp-handler builds a new McpServer for every request, so no two callers share one, and passes it the
+  // options it does not use itself; its type omits the SDK's McpServer options, hence the spread.
+  // maxToolInputElements caps the array elements and object members in one tools/call's arguments
+  // before the SDK validates them one by one. The largest input a tool takes is mark_seen's 200 ids
+  // (201 with their key; list_rounds peaks near 30), so a call past 256 is refused instead.
+  { serverInfo: { name: "fireround", version: "0.1.0" }, ...({ maxToolInputElements: 256 } satisfies McpServerOptions) },
 );
 
 const apiKey = process.env.MCP_API_KEY;
