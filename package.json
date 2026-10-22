@@ -71,7 +71,7 @@
     "botid": "^1.5.11",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
-    "drizzle-orm": "1.0.0-rc.4",
+    "drizzle-orm": "1.0.0-rc.5-5935859",
     "feed": "^6.0.0",
     "firecrawl": "^4.42.4",
     "geist": "^1.7.2",
