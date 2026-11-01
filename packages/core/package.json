@@ -29,7 +29,7 @@
     "firecrawl": "^4.42.4",
     "pg": "^8.23.0",
     "tldts": "^7.4.14",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^24",
