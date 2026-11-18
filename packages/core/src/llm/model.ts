@@ -128,6 +128,13 @@ export function publicationAuditModel(env: Record<string, string | undefined> = 
   );
 }
 
+/** The editor's model: EDITOR_MODEL when set, else the publication audit's default. */
+export function editorModel(env: Record<string, string | undefined> = process.env): ReconcileModel | null {
+  const pick = reconcileProviderFor({ ...env, RECONCILE: undefined });
+  if (!pick) return null;
+  return buildModel({ provider: pick.provider, modelId: env.EDITOR_MODEL?.trim() || PUBLICATION_AUDIT_DEFAULT_MODEL[pick.provider] }, env);
+}
+
 function buildModel(pick: { provider: ReconcileProvider; modelId: string }, env: Record<string, string | undefined>): ReconcileModel {
   const key = `${pick.provider}:${pick.modelId}:${env[KEY_FOR[pick.provider]] ?? "oidc"}`;
   const hit = cached.get(key);
